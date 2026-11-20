@@ -1,0 +1,53 @@
+<a class="skip" href="#main">{{ i18n.t('nav.skip') }}</a>
+@if (showShell() && auth.user(); as u) {
+  <header class="topbar">
+    <a class="brand" routerLink="/">⏱ {{ i18n.t('app.name') }}</a>
+    <button class="icon-btn menu-btn" type="button" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()"
+            aria-controls="mainnav" [attr.aria-label]="i18n.t('nav.menu')">☰</button>
+    <nav id="mainnav" [class.open]="menuOpen()" [attr.aria-label]="i18n.t('nav.main')">
+      <a routerLink="/day" routerLinkActive="active">{{ i18n.t('nav.day') }}</a>
+      <a routerLink="/week" routerLinkActive="active">{{ i18n.t('nav.week') }}</a>
+      <a routerLink="/absences" routerLinkActive="active">{{ i18n.t('nav.absences') }}</a>
+      <a routerLink="/summary" routerLinkActive="active">{{ i18n.t('nav.summary') }}</a>
+      <a routerLink="/reports" routerLinkActive="active">{{ i18n.t('nav.reports') }}</a>
+      @if (auth.isAdmin() || auth.isManagement()) { <a routerLink="/dashboard" routerLinkActive="active">{{ i18n.t('nav.dashboard') }}</a> }
+      @if (auth.isAdmin()) {
+        <details class="admin-menu">
+          <summary>{{ i18n.t('nav.admin') }}</summary>
+          <div>
+            <a routerLink="/admin/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>
+            <a routerLink="/admin/projects" routerLinkActive="active">{{ i18n.t('nav.projects') }}</a>
+            <a routerLink="/admin/master" routerLinkActive="active">{{ i18n.t('nav.master') }}</a>
+            <a routerLink="/admin/import" routerLinkActive="active">{{ i18n.t('nav.import') }}</a>
+            <a routerLink="/admin/periods" routerLinkActive="active">{{ i18n.t('nav.periods') }}</a>
+            <a routerLink="/admin/audit" routerLinkActive="active">{{ i18n.t('nav.audit') }}</a>
+            <a href="/mailbox" target="_blank" rel="noopener">{{ i18n.t('nav.mailbox') }}</a>
+          </div>
+        </details>
+      }
+      <a routerLink="/help" routerLinkActive="active">{{ i18n.t('nav.help') }}</a>
+    </nav>
+    <div class="tools">
+      <div class="seg" role="group" [attr.aria-label]="i18n.t('nav.language')">
+        <button type="button" [class.on]="i18n.lang() === 'de'" [attr.aria-pressed]="i18n.lang() === 'de'" (click)="lang('de')">DE</button>
+        <button type="button" [class.on]="i18n.lang() === 'en'" [attr.aria-pressed]="i18n.lang() === 'en'" (click)="lang('en')">EN</button>
+      </div>
+      <div class="bell">
+        <button class="icon-btn" type="button" (click)="toggleBell()" [attr.aria-expanded]="bellOpen()" [attr.aria-label]="i18n.t('nav.notifications')">
+          🔔 @if (auth.unread() > 0) { <span class="badge">{{ auth.unread() }}</span> }
+        </button>
+        @if (bellOpen()) {
+          <div class="popover" role="dialog" [attr.aria-label]="i18n.t('nav.notifications')">
+            @for (n of auth.notifications(); track n.id) { <p [class.unread]="!n.read">{{ notifText(n) }}<small>{{ i18n.dateTime(n.createdAt) }}</small></p> }
+            @empty { <p class="muted">{{ i18n.t('nav.noNotifications') }}</p> }
+          </div>
+        }
+      </div>
+      <a class="user" routerLink="/settings" [attr.title]="i18n.t('nav.settings')"><span class="avatar" aria-hidden="true">{{ initials() }}</span> {{ u.firstName }}</a>
+      <button type="button" class="btn small ghost" (click)="auth.logout()">{{ i18n.t('nav.logout') }}</button>
+    </div>
+  </header>
+}
+<main id="main" tabindex="-1" [class.shell]="showShell()">
+  <router-outlet />
+</main>
